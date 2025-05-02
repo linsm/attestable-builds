@@ -1,0 +1,50 @@
+name: System
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-everything:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean
+        run: make clean
+      - name: Build rust targets
+        run: |
+          make build-rust-enclave-client
+          make build-rust-host-server
+      - name: Build sandbox container
+        run: |
+          make build-sandbox
+      - name: Add fake SSH keys
+        run: |
+          mkdir -p ~/.ssh
+          echo "sk" > ~/.ssh/id_ed25519
+          echo "pk" > ~/.ssh/id_ed25519.pub
+          chmod 600 ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519.pub
+      - name: Add fake third-party pre-compiled dependencies
+        run: |
+          touch third-party/ip-to-vsock-transparent
+          touch third-party/dnsproxy
+      - name: Build enclave container
+        run: |
+          make build-enclave-container
+
+  third-parties:
+    name: Build all third-party executables
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build TCP-VSOCK proxy
+        run: ./third-party/build_vsock_proxy.sh
+      - name: Build DNS proxy
+        run: ./third-party/build_dns_proxy.sh

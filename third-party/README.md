@@ -1,0 +1,3 @@
+# Third-party dependencies
+
+All pre-compiled dependencies that we rely on. We plan to get rid of them at some point...

@@ -1,0 +1,17 @@
+name,runner_start_mode,fake_attestation,big_job,use_real_runner,target
+# test the new kid on the block
+smoke_neovim_ld,local_direct,true,false,true,project_neovim@project_neovim
+smoke_neovim_ed,enclave_direct,false,false,true,project_neovim@project_neovim
+smoke_neovim_esp,enclave_sandbox_plus,false,false,true,project_neovim@project_neovim
+# build sandbox
+#smoke_gprolog_ls,local_sandbox,true,false,true,project_gprolog@project_gprolog
+#smoke_hello_ls,local_sandbox,true,false,true,project_hello@project_hello
+#smoke_ipxe_ls,local_sandbox,true,false,true,project_ipxe@project_ipxe
+#smoke_menu_ls,local_sandbox,true,false,true,project_menu@project_menu
+#smoke_scheme48_ls,local_sandbox,true,false,true,project_scheme48@project_scheme48
+# build wet
+#smoke_gprolog_ed,local_sandbox,true,false,true,project_gprolog@project_gprolog
+#smoke_hello_ed,enclave_direct,true,false,true,project_hello@project_hello
+#smoke_ipxe_ed,enclave_direct,true,false,true,project_ipxe@project_ipxe
+#smoke_menu_ed,enclave_direct,true,false,true,project_menu@project_menu
+#smoke_scheme48_ed,enclave_direct,true,false,true,project_scheme48@project_scheme48

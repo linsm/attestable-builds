@@ -1,0 +1,2 @@
+This folder is for the enclave container that has no sandbox, i.e. for the enclave_wet.eif input Docker.
+The Dockerfile is different to the regular enclave container, and everything else is copied over.

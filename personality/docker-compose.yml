@@ -1,0 +1,16 @@
+version: '3.1'
+services:
+  personality:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always 
+    networks:
+      - attested-build
+    ports:
+      - "8008:8008"
+    hostname: personality
+
+networks:
+  attested-build:       
+    external: true

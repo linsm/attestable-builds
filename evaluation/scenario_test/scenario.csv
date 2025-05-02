@@ -1,0 +1,5 @@
+name,runner_start_mode,fake_attestation,big_job,use_real_runner,target
+local_direct_01,local_direct,true,true,false,project_c_simple
+local_sandbox_01,local_sandbox,true,true,false,project_c_simple@branch
+enclave_direct_01,enclave_direct,true,true,false,project_c_simple
+enclave_sandbox_01,enclave_sandbox,true,true,false,project_c_simple@brunch

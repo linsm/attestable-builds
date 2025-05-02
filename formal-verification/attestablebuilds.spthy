@@ -1,0 +1,302 @@
+theory attestablebuilds
+begin
+
+builtins: hashing, asymmetric-encryption
+
+// Restriction used to model equality checks 
+restriction equal:
+	"All x y #i. Verify(x,y) @i ==> x = y"
+
+
+// Info: Developer (A) commit code to the Respository Hosting Provider (RHP)
+// Protocol step: (1) Commit(code)
+rule commit_code:
+[ 
+  Fr(~code),
+]
+--[ Commit(~code) ]->
+[
+  !Code($A,~code) 	
+]
+
+// Info: Initializes the image with the PCR0 value
+// Trust assumption: user trusts the PCR0 value
+rule init_image_with_pcr0:
+[
+  Fr(~pcr0)
+]
+--[ InitImage(~pcr0) ]->
+[
+  !BuildImage(~pcr0)
+]
+
+// Info: Each image is uniquely associated with a single PCR0 value, representing a 1:1 relationship.
+// Trust assumption: Root-of-Trust is the PCR0 value
+// Attacker capabilities: An attacker may provide a malicious image with an "untrusted" PCR0 value
+// Threat Actors: A1, A2, A3
+// Threats: T1, T5, T6, T7 
+rule generate_build_image:
+[
+  !BuildImage(pcr0)
+]
+--[ PublishBuildImage(pcr0) ]->
+[
+  Out(pcr0) //Send image/PCR0 value via the adversary network 
+]
+
+// Receive code from developer and publish it 
+// Trigger build process by providing code via adversary network
+// also simulates threat where an attacker spoofs the repository
+rule rhp_provides_code:
+[
+  !Code($A,code), 
+]
+  --[ Publish(code) ]->
+[ 
+  Out(<$A,code>)
+]	
+
+// Initiate build infrastructure (server, enclave, sandbox)
+rule init_build_infrastructure:
+[		
+  In(<$A,code>)
+]
+--[ InitBuild(code) ]->
+[
+  CreateSecureCommit($B,$E,code),
+  StartBuild(code)		
+]
+
+// Store trustworthy commit hash before entering untrusted execution
+rule save_secure_commit:
+[
+  CreateSecureCommit($B,$E,code),
+]
+--[ StoreSecureCommit(h(code)) ]->
+[
+  !ProvideSecureCommit($B,$E,h(code))
+]
+
+rule verify_secure_commit:
+[
+  !ProvideSecureCommit($B,$E,commit),
+  !Code($A,code)
+]
+--[ Verify(h(code),commit) ]->
+[
+  SecureCommitVerify($A,code,commit)
+]
+
+rule secure_commit_verification_done:
+[
+  SecureCommitVerify($A,code,commit)
+]
+--[ CommitVerify(code,commit) ]->
+[
+
+]
+
+// Start build and provide artifact
+// artifact hash is not separately modeled as we receive it later from the artifact itself
+rule start_build_process:
+[
+  StartBuild(code)
+]
+--[ Artifact(code) ]->
+[
+  !ProvideArtifact(code) // currently we modeled the artifact as code so we have a relation between them
+]
+
+// Provide attestation 
+// In(pcr0) simulates an image given by the adversary
+rule peform_attestation:
+[
+  !ProvideArtifact(artifact),
+  !ProvideSecureCommit($B,$E,commit),
+  In(pcr0)
+]
+--[ Attestation(<commit,h(artifact),pcr0>) ]->
+[
+  !ProvideAttestation(<commit,h(artifact),pcr0>),  
+]
+
+rule log_entry:
+[
+  !ProvideAttestation(attestation),
+  !ProvideArtifact(artifact),
+  !ProvideSecureCommit($B,$E,commit),
+]
+--[ LogEntry(h(<commit,h(artifact),attestation>))]->
+[
+  !ProvideLogEntry($E,$C,h(<commit,h(artifact),attestation>))
+]
+
+rule verification:
+[
+  !ProvideLogEntry($E,$C,ip),
+  !ProvideArtifact(artifact),
+  !ProvideSecureCommit($B,$E,commit),
+  !ProvideAttestation(attestation),
+]
+--[ Verify(h(<commit,h(artifact),attestation>),ip) ]->
+[
+  LogVerification(<commit,h(artifact),attestation>,ip)
+]
+
+rule verification_inclusionproof_done:
+[
+  LogVerification(f,ip)
+]
+--[ LogVerify(f,ip) ]->
+[
+
+]
+
+rule verify_attestation:
+[
+  !BuildImage(pcr0),
+  !ProvideArtifact(artifact),
+  !ProvideSecureCommit($B,$E,commit),
+  !ProvideAttestation(attestation),
+]
+--[ Verify(attestation,<commit,h(artifact),pcr0>) ]->
+[
+  AttestationVerification(<commit,h(artifact),pcr0>,attestation)
+]
+
+rule verification_attestation_done:
+[
+  AttestationVerification(f,attestation)
+]
+--[ ATVerify(f,attestation) ]->
+[
+
+]
+
+// Developer needs to verify the log entry to know when an attacker tries to publish a malicious log entry
+// e.g., in case the signing key of the developer is lost
+// Developer verification of log entry is done via the commit hash to use known Code object as authentic reference
+rule developer_verifies_log_entry:
+[
+  !Code($A,code),
+  !ProvideLogEntry($E,$C,ip),
+  !ProvideArtifact(artifact),
+  !ProvideAttestation(attestation),
+]
+--[ Verify(h(<h(code),h(artifact),attestation>),ip) ]->
+[
+  RepositoryVerification(h(<h(code),h(artifact),attestation>),ip)
+]
+
+rule repository_verification_done:
+[
+  RepositoryVerification(devReference,ip)
+]
+--[ RepositoryVerify(devReference,ip) ]->
+[
+
+]
+
+lemma sanity_check_communication:
+  exists-trace
+  "Ex c ct a at p ip #o #v #u #w #x #y #z #t #s #r.
+    Commit(c) @o &
+    Publish(c) @v &
+    InitBuild(c) @u &
+    StoreSecureCommit(ct) @w &
+    CommitVerify(c,ct) @x &
+    Artifact(a) @y &
+    InitImage(p) @z &
+    Attestation(at) @t &
+    LogEntry(ip) @s &
+    LogVerify(<ct,h(a),at>,ip) @r
+  & h(c) = ct & h(c) = a & at = <ct,h(a),p> & ip = h(<ct,h(a),at>) & h(<ct,h(a),at>) = ip"
+
+// verify that the adversary can "learn" the code
+lemma adversary_learn_code: 
+  exists-trace
+  "Ex c #i.
+    Publish(c) @i & (Ex #j. K(c)@j)"
+
+// verify that the adversary can "learn" the pcr0 value
+lemma adversary_learn_pcr0: 
+  exists-trace
+  "Ex p #i.
+    PublishBuildImage(p) @i & (Ex #j. K(p)@j)"
+
+lemma attack_code_manipulation_detected:
+  "All c ct #i #j #k #l.
+    Commit(c) @i & 
+    Publish(c) @j &
+    StoreSecureCommit(ct) @k &
+    CommitVerify(c,ct) @l
+  ==> h(c) = ct"
+
+lemma attack_code_manipulation_successful:
+  exists-trace
+  "Ex c ct #i #j.
+    Publish(c) @i &
+    StoreSecureCommit(ct) @j
+  & not(h(c) = ct)"
+
+lemma attack_build_asset_manipulation_detected:	
+	"All c ct a at ip #v #u #w. 
+    Publish(c) @v &
+    CommitVerify(c,ct) @u &		
+		LogVerify(<ct,h(a),at>,ip) @w
+	==> h(c) = ct & h(<ct,h(a),at>) = ip"
+
+lemma attack_build_asset_manipulation_successful:
+  exists-trace
+  "Ex c ct at ip #i #j #k #l.
+    Publish(c) @i &
+    StoreSecureCommit(ct) @j &
+    Attestation(at) @k &
+    LogEntry(ip) @l 
+  & not(h(c) = ct) & not(h(<ct,h(c),h(c)>) = ip)"
+
+lemma attack_build_infrastructure_manipulation_successful:
+  exists-trace
+  "Ex c ct a p at #i #j #y #z #t.
+    Publish(c) @i &
+    StoreSecureCommit(ct) @j &
+    Artifact(a) @y &
+    InitImage(p) @z &
+    Attestation(at) @t 
+  & c = a & h(c) = ct & not(<c,h(a),p> = at)"
+
+lemma attack_build_infrastructure_manipulation_detected:
+  "All c ct a p at #i #j #k #l #m #n.
+    Publish(c) @i &
+    StoreSecureCommit(ct) @j &
+    Artifact(a) @k &
+    InitImage(p) @l &
+    Attestation(at) @m &
+    ATVerify(<c,h(a),p>,at) @n
+  ==> c = a & h(c) = ct & <c,h(a),p> = at"
+
+lemma attack_repository_spoofing_successful:
+  exists-trace
+  "Ex c ct a at ip #i #j #k #l #m #n #o.
+    Commit(c) @i & 
+    Publish(c) @j &
+    StoreSecureCommit(ct) @k &
+    CommitVerify(c,ct) @l &
+    Artifact(a) @m &
+    Attestation(at) @n &    
+    LogEntry(ip) @o 
+  & not(h(<h(c),h(a),at>) = ip)"
+  
+lemma attack_repository_spoofing_detected:
+  "All c ct a at ip r #i #j #k #l #m #n #o #p.
+    Commit(c) @i & 
+    Publish(c) @j &
+    StoreSecureCommit(ct) @k &
+    CommitVerify(c,ct) @l &
+    Artifact(a) @m &
+    Attestation(at) @n &    
+    LogEntry(ip) @o &
+    RepositoryVerify(r,ip) @p
+  ==> h(c) = ct & r = ip" 
+  
+end

@@ -1,0 +1,21 @@
+name,runner_start_mode,fake_attestation,big_job,use_real_runner,target
+smokeplus_tinycc_esp,enclave_sandbox_plus,false,false,true,project_tinycc@project_tinycc
+smoke_rust_small_ed,enclave_direct,false,false,true,project_rust_small@project_rust_small
+smokeplus_libsodium_esp,enclave_sandbox_plus,false,false,true,project_libsodium@project_libsodium
+#
+# Build one libxz in local_sandbox and one in the enclave_direct
+smoke_xz_tar_ls,local_sandbox,true,false,true,project_xz_tar@project_xz_tar
+smoke_xz_tar_ed,enclave_direct,false,false,true,project_xz_tar@project_xz_tar
+#
+# All other projects should work at least in the local local_sandbox
+smoke_tinyc_ls,local_sandbox,true,false,true,project_tinycc@project_tinycc
+smoke_libsodium_ls,local_sandbox,true,false,true,project_libsodium@project_libsodium
+smoke_verifier_client_ls,enclave_sandbox,false,false,true,project_verifier_client@project_verifier_client
+#
+# Finally check a local non-sandbox build with libxz which is the most complicated
+smoke_xz_tar_ld,local_direct,true,false,false,project_xz_tar@project_xz_tar
+#
+# Rust tests (some with the fake runner)
+smoke_rust_small_es,enclave_sandbox,false,false,false,project_rust_small@project_rust_small
+smoke_rust_small_ld,local_direct,true,false,true,project_rust_small@project_rust_small
+smoke_rust_small_ls,local_sandbox,true,false,false,project_rust_small@project_rust_small

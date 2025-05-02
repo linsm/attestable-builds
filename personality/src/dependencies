@@ -1,0 +1,4 @@
+https://raw.githubusercontent.com/googleapis/googleapis/a26064a9cc78d4518b8a9fd2ea78891edad4d87d/google/rpc/status.proto
+https://raw.githubusercontent.com/google/trillian/5979df6e8e907186d0f503ce029ef72a334e3524/trillian.proto
+https://raw.githubusercontent.com/google/trillian/5979df6e8e907186d0f503ce029ef72a334e3524/trillian_admin_api.proto
+https://raw.githubusercontent.com/google/trillian/5979df6e8e907186d0f503ce029ef72a334e3524/trillian_log_api.proto

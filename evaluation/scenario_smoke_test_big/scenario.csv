@@ -1,0 +1,19 @@
+name,runner_start_mode,fake_attestation,big_job,use_real_runner,target
+smoke_kernel_llvm_ld,local_direct,true,true,true,project_kernel_llvm@project_kernel_llvm
+smoke_kernel_llvm_ls,local_sandbox,true,true,true,project_kernel_llvm@project_kernel_llvm
+smoke_kernel_llvm_ed,enclave_direct,false,true,true,project_kernel_llvm@project_kernel_llvm
+smoke_kernel_llvm_es,enclave_sandbox,false,true,true,project_kernel_llvm@project_kernel_llvm
+smoke_kernel_llvm_esp,enclave_sandbox_plus,false,true,true,project_kernel_llvm@project_kernel_llvm
+# Build the tiny kernel five ways
+#smoke_kernel_tiny_ld,local_direct,true,true,true,project_kernel_tiny@project_kernel_tiny
+#smoke_kernel_tiny_ls,local_sandbox,true,true,true,project_kernel_tiny@project_kernel_tiny
+#smoke_kernel_tiny_ed,enclave_direct,false,true,true,project_kernel_tiny@project_kernel_tiny
+#smoke_kernel_tiny_es,enclave_sandbox,false,true,true,project_kernel_tiny@project_kernel_tiny
+#smoke_kernel_tiny_esp,enclave_sandbox_plus,false,true,true,project_kernel_tiny@project_kernel_tiny
+# Then test the default kernel two ways
+# smoke_kernel_ld,local_direct,true,true,true,project_kernel@project_kernel
+# smoke_kernel_esp,enclave_sandbox_plus,false,true,true,project_kernel@project_kernel
+# Then test clang three ways (making sure to cover all dependency setups)
+# smoke_clang_ld,local_direct,false,true,true,project_clang@project_clang
+#smoke_clang_ed,enclave_direct,false,true,true,project_clang@project_clang
+#smoke_clang_esp,enclave_sandbox_plus,false,true,true,project_clang@project_clang
