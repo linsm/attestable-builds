@@ -192,27 +192,27 @@ clean-eval:
 	cd evaluation && rm -r env || true
 
 eval-smoketest:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_smoke_test
 
 eval-smoketest-big:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_smoke_test_big
 
 eval-smoketest-new:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_smoke_test_new
 
 eval-full:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_full
 
 eval-full-big:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_full_big
 
 eval-full-new:
-	sudo rm -rf github-runner/2.323.0/_work
+	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_full_new
 
 
