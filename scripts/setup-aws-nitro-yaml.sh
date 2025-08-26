@@ -16,10 +16,10 @@ cat > /etc/nitro_enclaves/allocator.yaml<< EOF
 # Enclave configuration file.
 #
 # How much memory to allocate for enclaves (in MiB).
-memory_mib: 4096
+memory_mib: 16384
 #
 # How many CPUs to reserve for enclaves.
-cpu_count: 2
+cpu_count: 4
 EOF
 else
 cat > /etc/nitro_enclaves/allocator.yaml<< EOF
