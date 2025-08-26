@@ -136,7 +136,7 @@ setup-aws: setup-kmods
 	sudo ./scripts/setup-aws-install-packages.sh
 	sudo ./scripts/setup-aws-net-ns.sh
 	sudo ./scripts/setup-aws-nitro-yaml.sh
-	sudo systemctl restart nitro-enclaves-allocator.service
+#	sudo systemctl restart nitro-enclaves-allocator.service
 	sudo /sbin/modprobe vsock_loopback
 	sudo chmod o+x /home/ec2-user
 	sudo ./scripts/setup-runner-rust.sh
