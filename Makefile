@@ -207,9 +207,17 @@ eval-full:
 	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_full
 
+eval-full-one-round:
+	sudo rm -rf github-runner/2.328.0/_work
+	cd evaluation && source env/bin/activate && time python main.py scenario_full_one_round
+
 eval-full-big:
 	sudo rm -rf github-runner/2.328.0/_work
 	cd evaluation && source env/bin/activate && time python main.py scenario_full_big
+
+eval-full-big-one-round:
+	sudo rm -rf github-runner/2.328.0/_work
+	cd evaluation && source env/bin/activate && time python main.py scenario_full_big_one_round
 
 eval-full-new:
 	sudo rm -rf github-runner/2.328.0/_work
