@@ -36,7 +36,12 @@ cp .env.template .env
 sed -i "s|^\(GITHUB_REPOSITORY=\).*|\1$github_repo|" .env
 sed -i "s|^\(GITHUB_PAT_TOKEN=\).*|\1$github_token|" .env
 
-make setup-add-user-runner
+if id "runner" &>/dev/null; then
+  echo "runner user exists"
+else
+  make setup-add-user-runner
+fi
+
 make setup-aws
 . "$HOME/.cargo/env"
 
