@@ -18,7 +18,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 ssh-keygen -t ed25519 -N "" -f ~/.ssh/id_ed25519 -q
 
-cd attestable-builds && cargo build
+cargo build
 
 cp .env.template .env
 
