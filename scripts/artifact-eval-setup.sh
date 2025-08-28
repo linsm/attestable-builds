@@ -10,6 +10,8 @@ fi
 github_repo=$1
 github_token=$2
 
+cd /home/ec2-user/attestable-builds
+
 echo "[ ] Preparing the AWS instance for artifact evaluation"
 
 sudo dnf install aws-nitro-enclaves-cli aws-nitro-enclaves-cli-devel -y
