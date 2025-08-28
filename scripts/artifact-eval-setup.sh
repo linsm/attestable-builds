@@ -39,7 +39,12 @@ sed -i "s|^\(GITHUB_PAT_TOKEN=\).*|\1$github_token|" .env
 make setup-add-user-runner
 make setup-aws
 . "$HOME/.cargo/env"
-sudo systemctl enable --now nitro-enclaves-allocator.service
+
+if ! systemctl is-active --quiet nitro-enclaves-allocator.service; then
+  sudo systemctl enable --now nitro-enclaves-allocator.service
+else
+  echo "allocator service is already running."
+fi
 
 #install go
 wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
