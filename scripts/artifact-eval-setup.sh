@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+if [ $# -ne 2 ]; then
+  echo "Usage: $0 <GitHub Repo> <GitHub Token>"
+  echo "Example: $0 linsm/ab-samples github_pat_1111AAAABBBBB...."
+  exit 1
+fi
+
+github_repo=$1
+github_token=$2
+
 echo "[ ] Preparing the AWS instance for artifact evaluation"
 
 sudo dnf install aws-nitro-enclaves-cli aws-nitro-enclaves-cli-devel -y
@@ -22,16 +31,8 @@ cargo build
 
 cp .env.template .env
 
-# request GitHub token
-
-echo -n "Enter the repository information of your ab-samples fork <organization/ab-samples> (e.g., linsm/ab-samples): " 
-read github_repo
-
-echo -n "Enter your GitHub token for the forked ab-samples repository: " 
-read github_token
-
-sed -i "s/^GITHUB_REPOSITORY=.*/GITHUB_REPOSITORY=$github_repo/" .env
-sed -i "s/^GITHUB_PAT_TOKEN=.*/GITHUB_PAT_TOKEN=$github_token/" .env
+sed -i "s|^\(GITHUB_REPOSITORY=\).*|\1$github_repo|" .env
+sed -i "s|^\(GITHUB_PAT_TOKEN=\).*|\1$github_token|" .env
 
 make setup-add-user-runner
 make setup-aws
