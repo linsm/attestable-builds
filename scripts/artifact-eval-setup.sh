@@ -45,7 +45,7 @@ fi
 make setup-aws
 . "$HOME/.cargo/env"
 
-sudo systemctl enable --now nitro-enclaves-allocator.service
+sudo systemctl enable nitro-enclaves-allocator.service
 
 #if ! systemctl is-active --quiet nitro-enclaves-allocator.service; then
 #  sudo systemctl enable --now nitro-enclaves-allocator.service
@@ -57,6 +57,21 @@ sudo systemctl enable --now nitro-enclaves-allocator.service
 wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
+
+read -p "The machine needs to be rebooted. Do you want to reboot now? (y/n): " reboot
+case "$reboot" in
+  y|Y )
+    echo "Rebooting the machine."
+    sudo reboot now
+    ;;
+  n|N )
+    echo "Please reboot your machine manually before you continue."
+    ;;
+  * )
+    echo "Please enter y or n."
+    ;;
+esac
+
 
 #make build-third-party
 #make build-enclave-eif
