@@ -1,0 +1,126 @@
+# Artifact Evaluation Walkthrough
+
+This document provides a step-by-step guide to walk you through the artifact evaluation. 
+The main objective is to reproduce the evaluation results, presented in our paper. 
+
+The experiments provide time estimates in human-hours, or human-minutes (can be interrupted), and machine-hours, or machine-minutes (cannot be interrupted).
+
+## Prepare the sample repository (5 human-minutes)
+
+The first step is to prepare the Git repository including the sample projects used in our evaluation.
+The following list provides a step-by-step overview of the necessary preparation steps:
+
+1. Fork our [sample repository](https://github.com/linsm/ab-samples) to your own GitHub account. Make sure to copy all branches, i.e. remove the checkbox from `Copy the main branch only`
+2. Log in to your GitHub account and navigate to the [Developer Settings](https://github.com/settings/apps) of your GitHub account 
+3. Navigate to `Personal access tokens -> Fine-grained tokens` and click `Generate new token`
+4. Give it a name and select `Only select repositories` and select the forked repository (ab-samples) 
+5. Click on `Add permissions` and select the following permissions
+	1. Actions with Read and write
+	2. Administration with Read and write
+	3. Commit statuses with Read-only
+	4. Contents with Read-only
+	5. Environments with Read-only
+6. Generate the token and save it. This will be used later to configure the environment variable on the AWS instance.
+
+## Prepare the AWS environment
+
+The next step is to prepare the AWS environment, including the security group and the EC2 instance. 
+
+### Create the security group (2 human-minutes)
+
+1. Navigate to EC2 area / Networks & Security / Security Groups
+2. Create a new security group with the following settings:
+    - Give it a name (e.g., artifact-eval)
+    - Add a description (e.g., Allow SSH and GitHub hooks)
+    - Add a new Inbound rules (Custom TCP; Port range: 22; Source: "My IP" (note: if you have a dynamic IP then you have to change the security group everytime your ISP updates your IP)) 
+    - Add another Inbound rule (Custom TCP; Port range: 8000; Source: Anywhere-IPv4)
+
+### Create the Amazon EC2 instance (5 human-minutes)
+
+This will be the machine where the experiments are executed. To set up the instance follow the steps below:
+
+1. We recommend selecting the region `us-east-1`, available in the upper-right corner after logging in. 
+2. Navigate to `EC2 area -> Instances` and click on `Launch instances`
+3. Give it a name (e.g., artifact-eval)
+4. Select `Amazon Linux 2023 kernel-6.1 AMI` 
+5. Select Instance type: `m5a.8xlarge`
+6. Create a key pair for SSH access (select RSA or ED25519)
+7. Download your private ssh key and store it securely; adapt permissions (e.g., `chmod 600 <path-to-ssh-key>`)
+8. Select the previously created security group in the Network settings area
+9. Configure 64GiB gp3 Storage
+10. Go To Advanced details and enable `Nitro Enclave`
+11. Finally, launch the instance
+
+### Prepare the Amazon EC2 instance (5 human-mintues)
+
+Now the EC2 machine can be prepared for running the experiments.
+
+1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances)
+
+    `ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>`
+
+2. Install git: 
+
+    `sudo dnf install git -y`
+
+3. Clone our repository and change to it's directory:
+
+    `git clone https://github.com/linsm/attestable-builds && cd attestable-builds`
+
+4. Run the preparation script to install necessary dependencies and configuring the system:
+
+    `./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>`
+
+    The repository name refers to the fork created in the [Prepare the sample repository](#prepare-the-sample-repository-5-human-minutes).
+    This section also contains the creation of the token.
+
+5. Reboot the machine and reconnect once it is back online. 
+
+## Build the components 
+
+After rebooting the machine, it is possible to start building the relevant components used for setting up the build environment.
+
+1. Switch again to the cloned GitHub repository:
+
+    `cd attestable-builds`
+
+2. Run the setup for the AWS instance: (1 machine-minutes)
+
+    `make setup-aws`
+
+3. Build the third-party libraries: (5 machine-minutes)
+
+    `make build-third-party`
+
+4. Build the EIF file for the enclave: (10 machine-minutes)
+
+    `make build-enclave-eif`
+
+5. Build the EIF file for the enclave without the inner sandbox: (10 machine-minutes)
+
+    `make build-enclave-wet-eif`
+
+6. Cleanup, build the evaluation setup and prepare the runner: (2 human-minutes)
+
+    ``` 
+    sudo docker system prune -a -f
+    make build-eval
+    ./scripts/prepare-action-runner-for-local.sh
+    chmod o+rx ~
+    ```
+
+## Setup the webhook 
+
+The next step is to create a GitHub webhook on the forked sample repository. 
+
+Navigate to `https://github.com/ORGANIZATION/REPOSITORY/settings/hooks/new`
+
+    - Name `http://<PUBLIC-IP-AWS-INSTANCE>:8000`
+	- Select `application/json`
+	- Disable SSL verification
+
+## Start the evaluation
+
+
+
+
