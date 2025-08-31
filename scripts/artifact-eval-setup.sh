@@ -45,23 +45,25 @@ fi
 make setup-aws
 . "$HOME/.cargo/env"
 
-if ! systemctl is-active --quiet nitro-enclaves-allocator.service; then
-  sudo systemctl enable --now nitro-enclaves-allocator.service
-else
-  echo "allocator service is already running."
-fi
+sudo systemctl enable --now nitro-enclaves-allocator.service
+
+#if ! systemctl is-active --quiet nitro-enclaves-allocator.service; then
+#  sudo systemctl enable --now nitro-enclaves-allocator.service
+#else
+#  echo "allocator service is already running."
+#fi
 
 #install go
 wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 
-make build-third-party
-make build-enclave-eif
-make build-enclave-wet-eif
+#make build-third-party
+#make build-enclave-eif
+#make build-enclave-wet-eif
 
-sudo docker system prune -a -f
+#sudo docker system prune -a -f
 
-make build-eval
-./scripts/prepare-action-runner-for-local.sh
-chmod o+rx ~
+#make build-eval
+#./scripts/prepare-action-runner-for-local.sh
+#chmod o+rx ~
