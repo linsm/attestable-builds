@@ -17,7 +17,7 @@ INPUTS = {
         "targets": [
             "project_gprolog",
             "project_hello",
-            "project_ipxe",
+#            "project_ipxe",
             "project_neovim",
             "project_scheme48",
             'project_libsodium',
