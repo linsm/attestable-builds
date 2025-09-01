@@ -5,22 +5,24 @@ The main objective is to reproduce the evaluation results, presented in our pape
 
 The experiments provide time estimates in human-time (can be interrupted), and machine-time (cannot be interrupted).
 
-## Prepare the sample repository (5min human-time)
+## Prepare the `ab-samples` repository (5min human-time)
 
 The first step is to prepare the Git repository including the sample projects used in our evaluation.
 The following list provides a step-by-step overview of the necessary preparation steps:
 
-1. Fork our [sample repository](https://github.com/linsm/ab-samples) to your own GitHub account. Make sure to copy all branches, i.e. remove the checkbox from `Copy the main branch only`
-2. Log in to your GitHub account and navigate to the [Developer Settings](https://github.com/settings/apps) of your GitHub account 
-3. Navigate to `Personal access tokens -> Fine-grained tokens` and click `Generate new token`
-4. Give it a name and select `Only select repositories` and select the forked repository (ab-samples) 
-5. Click on `Add permissions` and select the following permissions
-	1. Actions with Read and write
-	2. Administration with Read and write
-	3. Commit statuses with Read-only
-	4. Contents with Read-only
-	5. Environments with Read-only
-6. Generate the token and save it. This will be used later to configure the environment variable on the AWS instance.
+1. Unzip the artifact files.
+2. Create a GitHub account and a new repository called `ab-samples`.
+3. Add the unzipped files located in the `ab-samples` directory to your new repository.
+4. On GitHub, navigate to the [Developer Settings](https://github.com/settings/apps) of your GitHub account.
+5. Navigate to `Personal access tokens -> Fine-grained tokens` and click `Generate new token`.
+6. Give it a name and select `Only select repositories` and select the new repository (ab-samples).
+7. Click on `Add permissions` and select the following permissions.
+	1. Actions with Read and write.
+	2. Administration with Read and write.
+	3. Commit statuses with Read-only.
+	4. Contents with Read-only.
+	5. Environments with Read-only.
+8. Generate the token and save it. This will be used later to configure the environment variable on the AWS instance.
 
 ## Prepare the AWS environment (10min human-time + 5min machine-time)
 
@@ -60,25 +62,25 @@ This will be the machine where the experiments are executed. To set up the insta
 
 Now the EC2 machine can be prepared for running the experiments.
 
-1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances) 
+1. Upload the artifact ZIP file to the server (the public IPv4 address is shown in AWS Portal -> Instances):
+
+   ```bash
+   scp -i <path-to-ssh-key.pem> artifact-evaluation.zip ec2-user@<public-ip-ec2-instance>:/home/ec2-user/artifact-evaluation.zip
+   ```
+   
+2. Connect to your instance via SSH, unzip the files and switch directory
 
    ```bash
    ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
+   unzip artifact-evaluation.zip && cd attestable-builds
    ```
-
+   
 3. Install git:
 
    ```bash
    sudo dnf install git -y
    ```
-
-5. Clone our repository and change to it's directory: 
-
-   ```bash
-   git clone https://github.com/linsm/attestable-builds && cd attestable-builds
-   ```
-
-7. Run the preparation script to install necessary dependencies and configuring the system: 
+4. Run the preparation script to install necessary dependencies and configuring the system: 
 
    ```bash
    ./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>
@@ -87,7 +89,7 @@ Now the EC2 machine can be prepared for running the experiments.
    The repository name refers to the fork created in the [Prepare the sample repository](#prepare-the-sample-repository-5-human-minutes).
    This section also contains the creation of the token.
 
-9. Reboot the machine and reconnect once it is back online. 
+5. Reboot the machine and reconnect once it is back online. 
 
 ## Build the components (5min human-time + 25min machine-time)
 
