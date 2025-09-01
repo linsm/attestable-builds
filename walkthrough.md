@@ -176,7 +176,7 @@ make eval-smoketest
 make eval-smoketest-big 
 ```
 
-## Run the evaluation (10h machine-time)
+## Run the evaluation (18h machine-time)
 
 The evaluation of the sample projects is separated into two scenarios - `eval-full-one-round` and `eval-full-big-one-round`. The following list provides an overview of the scenarios including the associated projects:  
 
