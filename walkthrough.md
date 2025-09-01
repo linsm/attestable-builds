@@ -57,50 +57,62 @@ Now the EC2 machine can be prepared for running the experiments.
 
 1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances)
 
-    `ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>`
+   ```
+   ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
+   ```
 
-2. Install git: 
+3. Install git: 
 
-    `sudo dnf install git -y`
+   ```
+   sudo dnf install git -y
+   ```
 
-3. Clone our repository and change to it's directory:
+5. Clone our repository and change to it's directory:
 
-    `git clone https://github.com/linsm/attestable-builds && cd attestable-builds`
+   ```
+   git clone https://github.com/linsm/attestable-builds && cd attestable-builds
+   ```
 
-4. Run the preparation script to install necessary dependencies and configuring the system:
+7. Run the preparation script to install necessary dependencies and configuring the system:
 
-    `./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>`
+   ```
+   ./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>
+   ```
 
-    The repository name refers to the fork created in the [Prepare the sample repository](#prepare-the-sample-repository-5-human-minutes).
-    This section also contains the creation of the token.
+   The repository name refers to the fork created in the [Prepare the sample repository](#prepare-the-sample-repository-5-human-minutes).
+   This section also contains the creation of the token.
 
-5. Reboot the machine and reconnect once it is back online. 
+9. Reboot the machine and reconnect once it is back online. 
 
 ## Build the components 
 
 After rebooting the machine, it is possible to start building the relevant components used for setting up the build environment.
 
-1. Switch again to the cloned GitHub repository:
+1. Switch again to the cloned GitHub repository and run the setup for the AWS instance: (1 machine-minutes):
 
-    `cd attestable-builds`
+   ```
+   cd attestable-builds && make setup-aws
+   ```
 
-2. Run the setup for the AWS instance: (1 machine-minutes)
+2. Build the third-party libraries: (5 machine-minutes)
 
-    `make setup-aws`
+   ```
+   make build-third-party
+   ```
 
-3. Build the third-party libraries: (5 machine-minutes)
+3. Build the EIF file for the enclave: (10 machine-minutes)
 
-    `make build-third-party`
+   ```
+   make build-enclave-eif
+   ```
 
-4. Build the EIF file for the enclave: (10 machine-minutes)
+4. Build the EIF file for the enclave without the inner sandbox: (10 machine-minutes)
 
-    `make build-enclave-eif`
+   ```
+   make build-enclave-wet-eif
+   ```
 
-5. Build the EIF file for the enclave without the inner sandbox: (10 machine-minutes)
-
-    `make build-enclave-wet-eif`
-
-6. Cleanup, build the evaluation setup and prepare the runner: (2 human-minutes)
+5. Cleanup, build the evaluation setup and prepare the runner: (2 human-minutes)
 
     ``` 
     sudo docker system prune -a -f
