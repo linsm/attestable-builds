@@ -275,6 +275,17 @@ Perform the following steps to generate the plots:
 3. Open the `Kernel` menu and click on `Restart Kernel and Run All Cells...`.
 4. Scroll down and wait until the generation process of the plots is finished.
 
+## Formal Verification
+
+First, you have to make sure that [Tamarin is installed](https://tamarin-prover.com/manual/master/book/002_installation.html).
+
+```bash
+cd formal-verification/
+tamarin-prover interactive attestablebuilds.spthy
+```
+
+Now the theory should be available on http://127.0.0.1:3001.
+You can execute the individual proof scripts by clicking the "sorry" link of the specific lemma followed by "autoprove" of the specific proof method. 
 
 
 
