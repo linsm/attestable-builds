@@ -3,9 +3,9 @@
 This document provides a step-by-step guide to walk you through the artifact evaluation. 
 The main objective is to reproduce the evaluation results, presented in our paper. 
 
-The experiments provide time estimates in human-hours, or human-minutes (can be interrupted), and machine-hours, or machine-minutes (cannot be interrupted).
+The experiments provide time estimates in human-time (can be interrupted), and machine-time (cannot be interrupted).
 
-## Prepare the sample repository (5 human-minutes)
+## Prepare the sample repository (5min human-time)
 
 The first step is to prepare the Git repository including the sample projects used in our evaluation.
 The following list provides a step-by-step overview of the necessary preparation steps:
@@ -22,11 +22,16 @@ The following list provides a step-by-step overview of the necessary preparation
 	5. Environments with Read-only
 6. Generate the token and save it. This will be used later to configure the environment variable on the AWS instance.
 
-## Prepare the AWS environment
+## Prepare the AWS environment (10min human-time + 5min machine-time)
+
+> [!WARNING]
+> Provisioning resources on AWS may incur charges.
+> Be aware that you may still be billed for resources that are stopped.
+> Make sure to make yourself familiar with the AWS pricing system (e.g., https://aws.amazon.com/de/getting-started/hands-on/control-your-costs-free-tier-budgets/)
 
 The next step is to prepare the AWS environment, including the security group and the EC2 instance. 
 
-### Create the security group (2 human-minutes)
+### Create the security group 
 
 1. Navigate to EC2 area / Networks & Security / Security Groups
 2. Create a new security group with the following settings:
@@ -35,7 +40,7 @@ The next step is to prepare the AWS environment, including the security group an
     - Add a new Inbound rules (Custom TCP; Port range: 22; Source: "My IP" (note: if you have a dynamic IP then you have to change the security group everytime your ISP updates your IP)) 
     - Add another Inbound rule (Custom TCP; Port range: 8000; Source: Anywhere-IPv4)
 
-### Create the Amazon EC2 instance (5 human-minutes)
+### Create the Amazon EC2 instance 
 
 This will be the machine where the experiments are executed. To set up the instance follow the steps below:
 
@@ -51,31 +56,31 @@ This will be the machine where the experiments are executed. To set up the insta
 10. Go To Advanced details and enable `Nitro Enclave`
 11. Finally, launch the instance
 
-### Prepare the Amazon EC2 instance (3 human-mintues + machine-minutes)
+### Prepare the Amazon EC2 instance 
 
 Now the EC2 machine can be prepared for running the experiments.
 
-1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances) (<1 human-minute)
+1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances) 
 
-   ```
+   ```bash
    ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
    ```
 
-3. Install git: (<1 human-minute)
+3. Install git:
 
-   ```
+   ```bash
    sudo dnf install git -y
    ```
 
-5. Clone our repository and change to it's directory: (<1 human-mi-i ~/Downloads/ssh/mario-artifact-eval.pem ec2-user@54.145.190.95nute)
+5. Clone our repository and change to it's directory: 
 
-   ```
+   ```bash
    git clone https://github.com/linsm/attestable-builds && cd attestable-builds
    ```
 
-7. Run the preparation script to install necessary dependencies and configuring the system: (4 machine-minutes)
+7. Run the preparation script to install necessary dependencies and configuring the system: 
 
-   ```
+   ```bash
    ./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>
    ```
 
@@ -84,52 +89,50 @@ Now the EC2 machine can be prepared for running the experiments.
 
 9. Reboot the machine and reconnect once it is back online. 
 
-## Build the components 
+## Build the components (5min human-time + 25min machine-time)
 
 After rebooting the machine, it is possible to start building the relevant components used for setting up the build environment.
 
-1. Switch again to the cloned GitHub repository and run the setup for the AWS instance: (<1 machine-minutes)
-
-   ```
+1. Switch again to the cloned GitHub repository and run the setup for the AWS instance:
+   ```bash
    cd attestable-builds && make setup-aws
    ```
 
-2. Install GO: (<1 human-minute)
+2. Install GO:
 
-   ```
+   ```bash
    wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
    export PATH=$PATH:/usr/local/go/bin
    ```
 
-3. Build the third-party libraries: (2 machine-minutes)
+3. Build the third-party libraries: 
 
-   ```
+   ```bash
    make build-third-party
    ```
 
-4. Build the EIF file for the enclave: (9 machine-minutes)
-
-   ```
+4. Build the EIF file for the enclave: 
+   ```bash
    make build-enclave-eif
    ```
 
-5. Build the EIF file for the enclave without the inner sandbox: (8 machine-minutes)
+5. Build the EIF file for the enclave without the inner sandbox: 
 
-   ```
+   ```bash
    make build-enclave-wet-eif
    ```
 
-6. Cleanup, build the evaluation setup and prepare the runner: (2 machine-minutes)
+6. Cleanup, build the evaluation setup and prepare the runner:
 
-    ``` 
+    ``` bash
     sudo docker system prune -a -f
     make build-eval
     ./scripts/prepare-action-runner-for-local.sh
     chmod o+rx ~
     ```
 
-## Setup the webhook (1 human-minute)
+## Setup the webhook (5min human-time)
 
 The next step is to create a GitHub webhook on the forked sample repository. 
 
@@ -143,62 +146,62 @@ SSL verification: Disable
 Active: Ticked
 ```    
 
-## Run the test suites
+## Run the test suites (2h machine-time)
 
 The repository contains two test suites to verify the configuration before running the final evaluation.
 The first test suite contains test cases where parts of the infrastructure is simulated (e.g., using a fake GitHub runner or webhook).
 
 To perform the initial verification tests. The test is successful if the following line is printed: 
 
-```
+```bash
 INFO host_server::log_publishing_service: [simulated] Received entry :)
 ```
 As soon as this line is printed, the test can be aborted with CTRL+C.
 
-```
-make test-local-direct (1 machine-minute)
-CTRL+C if the line above is printed.
-make test-nitro-direct (1 machine-minute)
-CTRL+C if the line above is printed.
-make test-nitro-sandbox (1 machine-minute)
-CTRL+C if the line above is printed.
-make test-nitro-sandbox-plus (1 machine-minute)
-CTRL+C if the line above is printed.
+```bash
+make test-local-direct 
+# CTRL+C when the line above is printed.
+make test-nitro-direct 
+#CTRL+C when the line above is printed.
+make test-nitro-sandbox 
+#CTRL+C when the line above is printed.
+make test-nitro-sandbox-plus 
+#CTRL+C when the line above is printed.
 ```
 
 Next, it is also possible to execute smoke tests of the final evaluation run:
 
-```
-make eval-smoketest (15 machine-minutes)
-make eval-smoketest-big (54 machine-minutes)
+```bash
+make eval-smoketest 
+make eval-smoketest-big 
 ```
 
-## Run the evaluation
+## Run the evaluation (10h machine-time)
 
 The evaluation of the sample projects is separated into two scenarios - `eval-full-one-round` and `eval-full-big-one-round`. The following list provides an overview of the scenarios including the associated projects:  
 
-- `eval-full-one-round`: GProlog, Hello, IPXE, Neovim, Scheme48, Libsodium, TinyCC, Verifier Client, XZ
+- `eval-full-one-round`: GProlog, Hello, Neovim, Scheme48, Libsodium, TinyCC, Verifier Client, XZ
 - `eval-full-big-one-round`: Clang, Linux Kernel and Linux Kernel-LLVM
 
 To perform the first evaluation, run:
 
-```
-make eval-full-one-round (251 machine-minutes)
+```bash
+make eval-full-one-round 
 ```
 
 To perform the second evaluation (big), run:
 
-```
-make eval-full-big-one-round (
+```bash
+make eval-full-big-one-round 
 ```
 
-## Generate the plots
+## Generate the plots (10min human-time + 5min machine-time)
 
 At this point the evaluation is finished and the respective log outputs of the project builds is stored in the evaluation directory. The next step is to prepare the pre-processing of the log files by adapting the corresponding script. 
 
 First, copy the name of the latest output folder of both scenarios (e.g., `output_2025-08-27_15-37-19`):
 
-```
+```bash
 ls -lha evaluation/scenario_full_one_round/
 ls -lha evaluation/scenario_full_big_one_round/
 ```
@@ -245,29 +248,34 @@ INPUTS = {
 
 Enter the python environment:
 
-```
+```bash
 source ./env/bin/activate
 ```
 
 Run the pre-process data script:
-```
+```bash
 python3 ./preprocess_data.py
 ```
 
 Run the jupyter notebook:
-```
-analysis_v2-ipynb
+```bash
+jupyter notebook
 ```
 
 Setup an SSH reverse tunnel to access the results via the browser:
 
-```
-ssh -NL 8000:localhost:8000 -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
+```bash
+ssh -NL 8888:localhost:8888 -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
 ```
 
-## Generate the plots (without building the projects)
+Perform the following steps to generate the plots: 
 
-It is also possible to generate the plots using the raw material that has been used to create the plots in the paper. 
+1. Click on the link provided by the jupyter notebook command (e.g., `http://localhost:8888/tree`).
+2. Open the `analysis_v2.ipynb`.
+3. Open the `Kernel` menu and click on `Restart Kernel and Run All Cells...`.
+4. Scroll down and wait until the generation process of the plots is finished.
+
+
 
 
 
