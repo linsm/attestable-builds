@@ -275,7 +275,7 @@ Perform the following steps to generate the plots:
 3. Open the `Kernel` menu and click on `Restart Kernel and Run All Cells...`.
 4. Scroll down and wait until the generation process of the plots is finished.
 
-## Formal Verification
+## Formal Verification (10min human-time + 5min machine-time)
 
 First, you have to make sure that [Tamarin is installed](https://tamarin-prover.com/manual/master/book/002_installation.html).
 
