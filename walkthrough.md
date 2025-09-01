@@ -67,7 +67,7 @@ Now the EC2 machine can be prepared for running the experiments.
    sudo dnf install git -y
    ```
 
-5. Clone our repository and change to it's directory: (<1 human-minute)
+5. Clone our repository and change to it's directory: (<1 human-mi-i ~/Downloads/ssh/mario-artifact-eval.pem ec2-user@54.145.190.95nute)
 
    ```
    git clone https://github.com/linsm/attestable-builds && cd attestable-builds
@@ -253,6 +253,23 @@ Run the pre-process data script:
 ```
 python3 ./preprocess_data.py
 ```
+
+Run the jupyter notebook:
+```
+analysis_v2-ipynb
+```
+
+Setup an SSH reverse tunnel to access the results via the browser:
+
+```
+ssh -NL 8000:localhost:8000 -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
+```
+
+## Generate the plots (without building the projects)
+
+It is also possible to generate the plots using the raw material that has been used to create the plots in the paper. 
+
+
 
 
 
