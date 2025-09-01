@@ -288,22 +288,3 @@ tamarin-prover interactive attestablebuilds.spthy
 
 Now the theory should be available on http://127.0.0.1:3001.
 You can execute the individual proof scripts by clicking the "sorry" link of the specific lemma followed by "autoprove" of the specific proof method. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
