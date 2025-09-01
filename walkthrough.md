@@ -143,7 +143,7 @@ SSL verification: Disable
 Active: Ticked
 ```    
 
-## Run the test suites and the evaluation
+## Run the test suites
 
 The repository contains two test suites to verify the configuration before running the final evaluation.
 The first test suite contains test cases where parts of the infrastructure is simulated (e.g., using a fake GitHub runner or webhook).
@@ -170,8 +170,10 @@ Next, it is also possible to execute smoke tests of the final evaluation run:
 
 ```
 make eval-smoketest (15 machine-minutes)
-make eval-smoketest-big ( machine-minutes)
+make eval-smoketest-big (54 machine-minutes)
 ```
+
+## Run the evaluation
 
 The evaluation of the sample projects is separated into two scenarios - `eval-full-one-round` and `eval-full-big-one-round`. The following list provides an overview of the scenarios including the associated projects:  
 
@@ -181,14 +183,83 @@ The evaluation of the sample projects is separated into two scenarios - `eval-fu
 To perform the first evaluation, run:
 
 ```
-make eval-full-one-round
+make eval-full-one-round (251 machine-minutes)
 ```
 
 To perform the second evaluation (big), run:
 
 ```
-make eval-full-big-one-round
+make eval-full-big-one-round (
 ```
+
+## Generate the plots
+
+At this point the evaluation is finished and the respective log outputs of the project builds is stored in the evaluation directory. The next step is to prepare the pre-processing of the log files by adapting the corresponding script. 
+
+First, copy the name of the latest output folder of both scenarios (e.g., `output_2025-08-27_15-37-19`):
+
+```
+ls -lha evaluation/scenario_full_one_round/
+ls -lha evaluation/scenario_full_big_one_round/
+```
+
+Open the file `evaluation/preprocess_data.py` in an editor (e.g., `vim`) and adapt the `"folder"` value of all three `INPUTS` entries accordingly:
+
+```python
+INPUTS = {
+    "big": {
+        "scenario": "scenario_full_big_one_round",
+        "folder": "<INSERT THE LATEST OUTPUT FOLDER OF THE BIG SCENARIO>",
+        "targets": [
+            'project_clang',
+            'project_kernel',
+            'project_kernel_llvm',
+        ],
+    },
+    "full": {
+        "scenario": "scenario_full_one_round",
+        "folder": "<INSERT THE LATEST OUTPUT FOLDER OF THE FULL SCENARIO>",
+        "targets": [
+            "project_gprolog",
+            "project_hello",
+            "project_ipxe",
+            "project_neovim",
+            "project_scheme48",
+            'project_libsodium',
+            'project_tinycc',
+            'project_verifier_client',
+            'project_xz_tar',
+        ],
+    },
+    "scalar": {
+        "scenario": "scenario_full_one_round",
+        "folder": "<INSERT THE LATEST OUTPUT FOLDER OF THE FULL SCENARIO>",
+        "targets": [
+            f"{project}_j{i}"
+            for project in ['project_verifier_client', 'project_xz_tar']
+            for i in range(1, 8 + 1)
+        ],
+    },
+}
+```
+
+Enter the python environment:
+
+```
+source ./env/bin/activate
+```
+
+Run the pre-process data script:
+```
+python3 ./preprocess_data.py
+```
+
+
+
+
+
+
+
 
 
 
