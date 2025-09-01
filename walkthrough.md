@@ -125,13 +125,58 @@ After rebooting the machine, it is possible to start building the relevant compo
 
 The next step is to create a GitHub webhook on the forked sample repository. 
 
-Navigate to `https://github.com/ORGANIZATION/REPOSITORY/settings/hooks/new`
+Navigate to `https://github.com/ORGANIZATION/REPOSITORY/settings/hooks/new` and replace the ORGANIZATION and the REPOSITORY accordingly.
+The webhook can be created with the following configuration:
 
-    - Name `http://<PUBLIC-IP-AWS-INSTANCE>:8000`
-	- Select `application/json`
-	- Disable SSL verification
+```
+Payload URL: `http://<PUBLIC-IP-AWS-INSTANCE>:8000
+Content type: `application/json`
+SSL verification: Disable
+Active: Ticked
+```    
 
-## Start the evaluation
+## Run the test suites and the evaluation
+
+The repository contains two test suites to verify the configuration before running the final evaluation.
+The first test suite contains test cases where parts of the infrastructure is simulated (e.g., using a fake GitHub runner or webhook).
+
+To perform the initial verification tests, run:
+
+```
+make test-local-direct
+make test-nitro-direct
+make test-nitro-sandbox
+make test-nitro-sandbox-plus
+```
+
+Next, it is possible to execute smoke tests of the final evaluation run:
+
+```
+make eval-smoketest
+make eval-smoketest-big
+```
+
+The evaluation of the sample projects is separated into two scenarios - `eval-full-one-round` and `eval-full-big-one-round`. The following list provides an overview of the scenarios including the associated projects:  
+
+- `eval-full-one-round`: GProlog, Hello, IPXE, Neovim, Scheme48, Libsodium, TinyCC, Verifier Client, XZ
+- `eval-full-big-one-round`: Clang, Linux Kernel and Linux Kernel-LLVM
+
+To perform the first evaluation, run:
+
+```
+make eval-full-one-round
+```
+
+To perform the second evaluation (big), run:
+
+```
+make eval-full-big-one-round
+```
+
+
+
+
+
 
 
 
