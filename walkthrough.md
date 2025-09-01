@@ -51,29 +51,29 @@ This will be the machine where the experiments are executed. To set up the insta
 10. Go To Advanced details and enable `Nitro Enclave`
 11. Finally, launch the instance
 
-### Prepare the Amazon EC2 instance (5 human-mintues)
+### Prepare the Amazon EC2 instance (3 human-mintues + machine-minutes)
 
 Now the EC2 machine can be prepared for running the experiments.
 
-1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances)
+1. Connect to your instance via SSH (the public IPv4 address is shown in AWS Portal -> Instances) (<1 human-minute)
 
    ```
    ssh -i <path-to-ssh-key.pem> ec2-user@<public-ip-ec2-instance>
    ```
 
-3. Install git: 
+3. Install git: (<1 human-minute)
 
    ```
    sudo dnf install git -y
    ```
 
-5. Clone our repository and change to it's directory:
+5. Clone our repository and change to it's directory: (<1 human-minute)
 
    ```
    git clone https://github.com/linsm/attestable-builds && cd attestable-builds
    ```
 
-7. Run the preparation script to install necessary dependencies and configuring the system:
+7. Run the preparation script to install necessary dependencies and configuring the system: (4 machine-minutes)
 
    ```
    ./scripts/artifact-eval-setup.sh <INSERT REPOSITORY> <INSERT TOKEN>
@@ -88,31 +88,39 @@ Now the EC2 machine can be prepared for running the experiments.
 
 After rebooting the machine, it is possible to start building the relevant components used for setting up the build environment.
 
-1. Switch again to the cloned GitHub repository and run the setup for the AWS instance: (1 machine-minutes):
+1. Switch again to the cloned GitHub repository and run the setup for the AWS instance: (<1 machine-minutes)
 
    ```
    cd attestable-builds && make setup-aws
    ```
 
-2. Build the third-party libraries: (5 machine-minutes)
+2. Install GO: (<1 human-minute)
+
+   ```
+   wget https://go.dev/dl/go1.25.0.linux-amd64.tar.gz
+   sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.25.0.linux-amd64.tar.gz
+   export PATH=$PATH:/usr/local/go/bin
+   ```
+
+3. Build the third-party libraries: (2 machine-minutes)
 
    ```
    make build-third-party
    ```
 
-3. Build the EIF file for the enclave: (10 machine-minutes)
+4. Build the EIF file for the enclave: (9 machine-minutes)
 
    ```
    make build-enclave-eif
    ```
 
-4. Build the EIF file for the enclave without the inner sandbox: (10 machine-minutes)
+5. Build the EIF file for the enclave without the inner sandbox: (8 machine-minutes)
 
    ```
    make build-enclave-wet-eif
    ```
 
-5. Cleanup, build the evaluation setup and prepare the runner: (2 human-minutes)
+6. Cleanup, build the evaluation setup and prepare the runner: (2 machine-minutes)
 
     ``` 
     sudo docker system prune -a -f
@@ -121,7 +129,7 @@ After rebooting the machine, it is possible to start building the relevant compo
     chmod o+rx ~
     ```
 
-## Setup the webhook 
+## Setup the webhook (1 human-minute)
 
 The next step is to create a GitHub webhook on the forked sample repository. 
 
@@ -140,20 +148,29 @@ Active: Ticked
 The repository contains two test suites to verify the configuration before running the final evaluation.
 The first test suite contains test cases where parts of the infrastructure is simulated (e.g., using a fake GitHub runner or webhook).
 
-To perform the initial verification tests, run:
+To perform the initial verification tests. The test is successful if the following line is printed: 
 
 ```
-make test-local-direct
-make test-nitro-direct
-make test-nitro-sandbox
-make test-nitro-sandbox-plus
+INFO host_server::log_publishing_service: [simulated] Received entry :)
 ```
-
-Next, it is possible to execute smoke tests of the final evaluation run:
+As soon as this line is printed, the test can be aborted with CTRL+C.
 
 ```
-make eval-smoketest
-make eval-smoketest-big
+make test-local-direct (1 machine-minute)
+CTRL+C if the line above is printed.
+make test-nitro-direct (1 machine-minute)
+CTRL+C if the line above is printed.
+make test-nitro-sandbox (1 machine-minute)
+CTRL+C if the line above is printed.
+make test-nitro-sandbox-plus (1 machine-minute)
+CTRL+C if the line above is printed.
+```
+
+Next, it is also possible to execute smoke tests of the final evaluation run:
+
+```
+make eval-smoketest (15 machine-minutes)
+make eval-smoketest-big ( machine-minutes)
 ```
 
 The evaluation of the sample projects is separated into two scenarios - `eval-full-one-round` and `eval-full-big-one-round`. The following list provides an overview of the scenarios including the associated projects:  
